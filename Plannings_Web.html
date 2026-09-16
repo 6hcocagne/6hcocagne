@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Mon planning bénévole</title>
+<style>
+  :root {
+    --bleu: #305496;
+    --bleu-clair: #d9e2f3;
+    --gris-texte: #444;
+    --gris-fond: #f4f6fb;
+    --gris-bordure: #dde3ee;
+    --vert: #1e7d46;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--gris-fond);
+    color: #1a1a1a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .page { max-width: 640px; margin: 0 auto; padding: 0 0 40px; }
+  header.topbar {
+    background: var(--bleu);
+    color: #fff;
+    padding: 18px 20px 16px;
+    text-align: center;
+  }
+  header.topbar .app-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    opacity: .85;
+    margin: 0 0 6px;
+  }
+  header.topbar .nom {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.25;
+  }
+  .total-general {
+    display: inline-block;
+    margin-top: 10px;
+    background: rgba(255,255,255,.16);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  main { padding: 16px 14px 0; }
+  .jour-bloc {
+    background: #fff;
+    border: 1px solid var(--gris-bordure);
+    border-radius: 14px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(20,30,60,.05);
+  }
+  .jour-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    background: var(--bleu-clair);
+    padding: 10px 16px;
+  }
+  .jour-entete .jour-nom {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--bleu);
+  }
+  .jour-entete .jour-total {
+    font-size: 13px;
+    color: var(--bleu);
+    font-weight: 600;
+  }
+  .tache {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--gris-bordure);
+  }
+  .tache:first-of-type { border-top: none; }
+  .tache .heure {
+    flex: 0 0 auto;
+    width: 62px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gris-texte);
+    line-height: 1.35;
+    padding-top: 2px;
+  }
+  .tache .contenu { flex: 1 1 auto; min-width: 0; }
+  .tache .ligne-titre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .badge-numero {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .titre-tache {
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  .commentaire {
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: #666;
+    white-space: pre-line;
+    line-height: 1.4;
+  }
+  .avec-qui {
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: #d40000;
+    line-height: 1.4;
+  }
+  .duree {
+    margin-top: 5px;
+    font-size: 11.5px;
+    color: var(--vert);
+    font-weight: 600;
+  }
+  .total-final {
+    text-align: center;
+    background: #fff;
+    border: 1px solid var(--gris-bordure);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 4px 0 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--bleu);
+  }
+  .total-final span { color: var(--vert); }
+  footer {
+    text-align: center;
+    font-size: 11.5px;
+    color: #99a2b3;
+    padding: 10px 20px 0;
+  }
+
+  /* --- Recherche (quand aucun ?id= valide n'est fourni) --- */
+  .recherche { padding: 16px 14px; }
+  .recherche h2 { font-size: 17px; color: var(--bleu); margin: 4px 0 10px; }
+  .recherche p { font-size: 13.5px; color: #667; margin: 0 0 14px; }
+  .recherche input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid var(--gris-bordure);
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  .liste-resultats { display: flex; flex-direction: column; gap: 8px; }
+  .resultat-item {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--gris-bordure);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: #1a1a1a;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+  .resultat-item small { display: block; font-weight: 400; color: #888; font-size: 12px; margin-top: 2px; }
+  .vide { text-align: center; color: #888; font-size: 13.5px; padding: 30px 10px; }
+</style>
+</head>
+<body>
+<div class="page" id="page"></div>
+
+<script>
+/* ==== Données générées par le classeur (Excel ou Google Sheets) ==== */
+const DATA = {
+  "genere": "16/09/2026 21:10",
+  "benevoles": {
+    "B001": {
+      "nom": "Authier",
+      "prenom": "Laure",
+      "total": 11,
+      "jours": [
+        {"jour": "Samedi", "total": 8, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S13", "titre": "Casse-croûte bénévoles", "commentaire": "Lieu : Salle des Fêtes\nFaire les sandwichs\nfinir les sacs (sandwich, petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et cadeaux buff et écocup)\nDistribution des premiers à partir de 10h30 ( bénévole du parcours )", "duree": 1.5, "couleur": "#009B77", "avecQui": "Authier Laure, Gombert Sylvie, Lagarrigue Sylvie, Legriel Caula Sophie, Morin Caroline, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S32", "titre": "Sécurité Parcours P2 Equipe 2", "commentaire": "Rond point avenue Victor Molinier / rue Alain Saint Paul ", "duree": 2, "couleur": "#88B04B", "avecQui": "Authier Laure, Vigier Serge"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:30", "numero": "S61", "titre": "Repas Banda", "commentaire": "Lieu : Salle des Fêtes\nService du groupe de bandas\nprépation de la table vin, eau, pain et café\nNettoyage de la table des bandas", "duree": 1, "couleur": "#009B77", "avecQui": "Authier Laure, Lagarrigue Sylvie, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D02", "titre": "Salle des fêtes", "commentaire": "Lieu : Salle des Fêtes\nNettoyer la vaisselle\nranger le matériel\nranger la nourriture et faire le bilan\nBilan des boissons\nmettre de côté tout ce qui doit être rendu aux fournisseurs", "duree": 3, "couleur": "#FF6F61", "avecQui": "Authier Laure, Authier Laurent, Gombert Eric, Gombert Sylvie, Lavigne Gérard, Lavigne Martine, Roca Christophe"}
+        ]}
+      ]
+    },
+    "B002": {
+      "nom": "Authier",
+      "prenom": "Laurent",
+      "total": 13.5,
+      "jours": [
+        {"jour": "Samedi", "total": 10.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "09:00", "numero": "S04", "titre": "Mise en place éléctricité", "commentaire": "Lieu : Place salle des Fêtes\nTirer une rallonge du coffret de la salle au parc en aérien\nTirer une rallonge des vestiaires au milieu du terrain de foot\nPosition : voir avec Michel Berardo", "duree": 1, "couleur": "#FFC000", "avecQui": "Authier Laurent, Dupont Philippe, Roca Christophe"},
+          {"periode": "Matin", "hd": "10:00", "hf": "12:00", "numero": "S14", "titre": "Remise des dossards 6h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#DD4124", "avecQui": "Authier Laurent, Beaules Manon, Vuillemin Nicole"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S34", "titre": "Sécurité Parcours P4 Equipe 2", "commentaire": "Croisement rue 19 mars 1962 / rue Guillaume Appolinaire\nPour info circulation alternée sur cette zone", "duree": 2, "couleur": "#92A8D1", "avecQui": "Authier Laurent, Legriel Sébastien"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S60", "titre": "Panneaux déviations fin", "commentaire": "Lieu : Place salle des Fêtes - Sainte Foy\nRéouverture de l'av Joseph Huc et Vitor Molinier à 18h30\nRécupération des panneaux de déviations", "duree": .5, "couleur": "#B565A7", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Martineau Loïc"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Après-midi/Soir", "hd": "20:00", "hf": "20:30", "numero": "S67", "titre": "Démontage buvette", "commentaire": "Lieu : Place salle des Fêtes\nSerge Vigier gère ce poste\nRanger les boissons\nRanger les tireuses\ndémonter la structure\ntout mettre dans la salle du foot", "duree": .5, "couleur": "#56B4E9", "avecQui": "Authier Laurent, Beaules Léon, Cornille Solène, Vigier Serge"},
+          {"periode": "Soir", "hd": "22:00", "hf": "23:00", "numero": "S75", "titre": "Service Gâteau", "commentaire": "Lieu : Salle des Fêtes\nServir la tarte aux pommes dans les assiettes et les donner aux personnes\nsur la fin les mettre dans les assiettes et les poser sur une table", "duree": 1, "couleur": "#00B0F0", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Manon, Bouloc Laurent, Dupont Geneviève"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D02", "titre": "Salle des fêtes", "commentaire": "Lieu : Salle des Fêtes\nNettoyer la vaisselle\nranger le matériel\nranger la nourriture et faire le bilan\nBilan des boissons\nmettre de côté tout ce qui doit être rendu aux fournisseurs", "duree": 3, "couleur": "#FF6F61", "avecQui": "Authier Laure, Authier Laurent, Gombert Eric, Gombert Sylvie, Lavigne Gérard, Lavigne Martine, Roca Christophe"}
+        ]}
+      ]
+    },
+    "B003": {
+      "nom": "Authier",
+      "prenom": "Maxime",
+      "total": 3,
+      "jours": [
+        {"jour": "Samedi", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S05", "titre": "Structure ravitaillement ", "commentaire": "Lieu : Place salle des Fêtes\nInstallation Barnum 10x5 ( Alain Morin gère le montage )\nMise en place des poids\nMise en place des tables\nMise en place des supports pour les écocups ( Alain Morin  )", "duree": 2, "couleur": "#A9D08E", "avecQui": "Authier Maxime, Bouloc Laurent, Gombert Eric, Martineau Loïc, Morin Alain, Vuillemin Marc"},
+          {"periode": "Matin", "hd": "11:00", "hf": "11:30", "numero": "S19", "titre": "Récupérer les pizzas", "commentaire": "Lieu : Place salle des Fêtes - Chez Dany\nRécupérer 2 plaques de pizzas pour le ravitaillement chez Dany", "duree": .5, "couleur": "#56B4E9", "avecQui": "Authier Maxime, Bouloc Laurent"}
+        ]}
+      ]
+    },
+    "B004": {
+      "nom": "Bahurlet",
+      "prenom": "Gisèle",
+      "total": 14.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S22", "titre": "Sécurité Parcours P2 Equipe 1", "commentaire": "Rond point avenue Victor Molinier / rue Alain Saint Paul\n11h30-12h00: Mise en place des barrières et rubalises", "duree": 3, "couleur": "#0072B2", "avecQui": "Bahurlet Gisèle, Vivier Ludovic"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S46", "titre": "Sécurité Parcours P3 Equipe 3", "commentaire": "Croisement rue Alain Saint Paul / rue 19 mars 1962\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise\nRemonter les conteneurs à la salle", "duree": 2.5, "couleur": "#0072B2", "avecQui": "Bahurlet Gisèle, Vivier Ludovic"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S60", "titre": "Panneaux déviations fin", "commentaire": "Lieu : Place salle des Fêtes - Sainte Foy\nRéouverture de l'av Joseph Huc et Vitor Molinier à 18h30\nRécupération des panneaux de déviations", "duree": .5, "couleur": "#B565A7", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Martineau Loïc"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "22:00", "hf": "23:00", "numero": "S75", "titre": "Service Gâteau", "commentaire": "Lieu : Salle des Fêtes\nServir la tarte aux pommes dans les assiettes et les donner aux personnes\nsur la fin les mettre dans les assiettes et les poser sur une table", "duree": 1, "couleur": "#00B0F0", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Manon, Bouloc Laurent, Dupont Geneviève"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Lundi", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "L01", "titre": "Rendre le matériel", "commentaire": "Lieu : Salle des Fêtes et salle du foot\nRendre le matériel aux fournisseurs\nvoir avec eux pour les heures", "duree": 3, "couleur": "#6B5B95", "avecQui": "Bahurlet Gisèle, Dal Corso Christian"}
+        ]}
+      ]
+    },
+    "B005": {
+      "nom": "Beaules",
+      "prenom": "Léon",
+      "total": 10,
+      "jours": [
+        {"jour": "Samedi", "total": 10, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S25", "titre": "Sécurité Parcours P5 Equipe 1", "commentaire": "Bas du cimetière / rue Guillaume Appolinaire et rue Claude Nougaro\n11h30-12h00: Mise en place des barrières et rubalises\nCirculation alternée sur cette zone à gérer avec le poste d'avant P4", "duree": 3, "couleur": "#999999", "avecQui": "Beaules Léon, Odouard Dominique"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S47", "titre": "Sécurité Parcours P4 Equipe 3", "commentaire": "Croisement rue 19 mars 1962 / rue Guillaume Appolinaire\nPour info circulation alternée sur cette zone\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#D55E00", "avecQui": "Beaules Léon, Odouard Dominique"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S60", "titre": "Panneaux déviations fin", "commentaire": "Lieu : Place salle des Fêtes - Sainte Foy\nRéouverture de l'av Joseph Huc et Vitor Molinier à 18h30\nRécupération des panneaux de déviations", "duree": .5, "couleur": "#B565A7", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Martineau Loïc"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Après-midi/Soir", "hd": "20:00", "hf": "20:30", "numero": "S67", "titre": "Démontage buvette", "commentaire": "Lieu : Place salle des Fêtes\nSerge Vigier gère ce poste\nRanger les boissons\nRanger les tireuses\ndémonter la structure\ntout mettre dans la salle du foot", "duree": .5, "couleur": "#56B4E9", "avecQui": "Authier Laurent, Beaules Léon, Cornille Solène, Vigier Serge"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B006": {
+      "nom": "Beaules",
+      "prenom": "Manon",
+      "total": 10,
+      "jours": [
+        {"jour": "Samedi", "total": 10, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:00", "hf": "10:00", "numero": "S08", "titre": "Finir les sacs coureurs et distribution", "commentaire": "Lieu : Salle des Fêtes\nFinir les sacs si besoin et les vérifier ( voir la liste en V05 )\nPréparer le poste de remise des dossards ", "duree": 1, "couleur": "#88B04B", "avecQui": "Beaules Manon, Cornille Solène, Roca Christophe"},
+          {"periode": "Matin", "hd": "10:00", "hf": "12:00", "numero": "S14", "titre": "Remise des dossards 6h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#DD4124", "avecQui": "Authier Laurent, Beaules Manon, Vuillemin Nicole"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S31", "titre": "Sécurité Parcours P1 Equipe 2", "commentaire": "Place de la mairie et de l'église", "duree": 2, "couleur": "#6B5B95", "avecQui": "Beaules Manon, Pallaruelo Françoise"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:00", "numero": "S68", "titre": "Récupérer le pain et les tartes", "commentaire": "lieu : Place de la salle des fêtes\nRécupérer le pain ( 50 baguettes )\nRécupérer les tartes aux pommes ( x plaques )\nPhilippe le boulanger les amène sur la place avec le camion.\nOn lui offre une bière en remerciement", "duree": .5, "couleur": "#009E73", "avecQui": "Beaules Manon, Gombert Sylvie"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "22:00", "hf": "23:00", "numero": "S75", "titre": "Service Gâteau", "commentaire": "Lieu : Salle des Fêtes\nServir la tarte aux pommes dans les assiettes et les donner aux personnes\nsur la fin les mettre dans les assiettes et les poser sur une table", "duree": 1, "couleur": "#00B0F0", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Manon, Bouloc Laurent, Dupont Geneviève"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B007": {
+      "nom": "Berardo",
+      "prenom": "Karine",
+      "total": 2.5,
+      "jours": [
+        {"jour": "Samedi", "total": 2.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Après-midi", "hd": "15:30", "hf": "16:00", "numero": "S42", "titre": "Breafing Rando & enfant 3km", "commentaire": "Lieu : Place salle des Fêtes\nBreafing rando & enfant 3km + départ 16h00", "duree": .5, "couleur": "#E69F00", "avecQui": "Berardo Karine, Berardo Michel"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "20:00", "numero": "S64", "titre": "Podium", "commentaire": "Lieu : Place salle des Fêtes\nRemise des prix", "duree": 1.5, "couleur": "#EFC050", "avecQui": "Berardo Karine, Berardo Michel"}
+        ]}
+      ]
+    },
+    "B008": {
+      "nom": "Berardo",
+      "prenom": "Michel",
+      "total": 3,
+      "jours": [
+        {"jour": "Samedi", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Après-midi", "hd": "15:30", "hf": "16:00", "numero": "S42", "titre": "Breafing Rando & enfant 3km", "commentaire": "Lieu : Place salle des Fêtes\nBreafing rando & enfant 3km + départ 16h00", "duree": .5, "couleur": "#E69F00", "avecQui": "Berardo Karine, Berardo Michel"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "16:30", "numero": "S51", "titre": "Breafing Enfant 2km", "commentaire": "Lieu : Place salle des Fêtes\nBreafing Enfant 2km + départ 16h30", "duree": .5, "couleur": "#00B0F0", "avecQui": "Berardo Michel"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "20:00", "numero": "S64", "titre": "Podium", "commentaire": "Lieu : Place salle des Fêtes\nRemise des prix", "duree": 1.5, "couleur": "#EFC050", "avecQui": "Berardo Karine, Berardo Michel"}
+        ]}
+      ]
+    },
+    "B009": {
+      "nom": "Boudot",
+      "prenom": "Sylvie",
+      "total": 9.5,
+      "jours": [
+        {"jour": "Samedi", "total": 9.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi", "hd": "11:30", "hf": "14:00", "numero": "S28", "titre": "Ravitaillement Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2.5, "couleur": "#FFC000", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S36", "titre": "Sécurité Parcours P6 Equipe 2", "commentaire": "Tennis + Toilettes coureurs ", "duree": 2, "couleur": "#B565A7", "avecQui": "Boudot Sylvie, Long Véronique"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "19:00", "numero": "S50", "titre": "Ravitaillement Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 3, "couleur": "#7030A0", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B010": {
+      "nom": "Bouloc",
+      "prenom": "Laurent",
+      "total": 13,
+      "jours": [
+        {"jour": "Samedi", "total": 10, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S05", "titre": "Structure ravitaillement ", "commentaire": "Lieu : Place salle des Fêtes\nInstallation Barnum 10x5 ( Alain Morin gère le montage )\nMise en place des poids\nMise en place des tables\nMise en place des supports pour les écocups ( Alain Morin  )", "duree": 2, "couleur": "#A9D08E", "avecQui": "Authier Maxime, Bouloc Laurent, Gombert Eric, Martineau Loïc, Morin Alain, Vuillemin Marc"},
+          {"periode": "Matin", "hd": "11:00", "hf": "11:30", "numero": "S19", "titre": "Récupérer les pizzas", "commentaire": "Lieu : Place salle des Fêtes - Chez Dany\nRécupérer 2 plaques de pizzas pour le ravitaillement chez Dany", "duree": .5, "couleur": "#56B4E9", "avecQui": "Authier Maxime, Bouloc Laurent"},
+          {"periode": "Matin", "hd": "11:30", "hf": "12:00", "numero": "S27", "titre": "Panneaux déviations début", "commentaire": "Fermeture de la circulation Rond point SPAR et Statue de la vierge à 11h30\nFermeture de l'av Joseph Huc et Vitor Molinier à 11h30\nMise en place des panneaux de déviation", "duree": .5, "couleur": "#00B0F0", "avecQui": "Bouloc Laurent, Duverneuil Mathieu, Lavigne Gérard, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "15:00", "numero": "S39", "titre": "Animation Mobile 1", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 1", "duree": 1, "couleur": "#45B8AC", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "15:30", "hf": "16:30", "numero": "S43", "titre": "Animation Mobile 2", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 2", "duree": 1, "couleur": "#56B4E9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S57", "titre": "Animation Mobile 3", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 3", "duree": 1, "couleur": "#F7CAC9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:00", "numero": "S59", "titre": "Récupérer les pizzas ", "commentaire": "lieu : Chez Dany\nRécupérer 6 plaques de pizzas pour l'apéro chez Dany", "duree": .5, "couleur": "#955251", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "22:00", "hf": "23:00", "numero": "S75", "titre": "Service Gâteau", "commentaire": "Lieu : Salle des Fêtes\nServir la tarte aux pommes dans les assiettes et les donner aux personnes\nsur la fin les mettre dans les assiettes et les poser sur une table", "duree": 1, "couleur": "#00B0F0", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Manon, Bouloc Laurent, Dupont Geneviève"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D01", "titre": "Nettoyage parcours", "commentaire": "Lieu : Place de la salle des Fêtes - Parcours\nRetirer la rubalise\nvérifier rangement de barrières\nramasser les déchets\nramasser les piquets et les rapporter à Gilbert", "duree": 3, "couleur": "#A9D08E", "avecQui": "Bouloc Laurent, Couderc Alain, Dal Corso Christian, Vuillemin Marc"}
+        ]}
+      ]
+    },
+    "B011": {
+      "nom": "Bouloc",
+      "prenom": "Véronique",
+      "total": 13.5,
+      "jours": [
+        {"jour": "Samedi", "total": 13.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S16", "titre": "Mettre en place le ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nInstaller les écocups par numéro\nInstaller le solide et le liquide\nMise en place pub partenaires ( banderole, Affiches )", "duree": 1, "couleur": "#EFC050", "avecQui": "Bouloc Véronique, Dal Corso Domy, Delmas Elisabeth, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:30", "hf": "14:00", "numero": "S28", "titre": "Ravitaillement Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2.5, "couleur": "#FFC000", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "19:00", "numero": "S50", "titre": "Ravitaillement Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 3, "couleur": "#7030A0", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B012": {
+      "nom": "Calmettes",
+      "prenom": "Michel",
+      "total": 12.5,
+      "jours": [
+        {"jour": "Samedi", "total": 12.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi/Soir", "hd": "10:00", "hf": "20:30", "numero": "S17", "titre": "Repas", "commentaire": "Lieu : Salle des Fêtes\nPréparation du repas", "duree": 10.5, "couleur": "#5B5EA6", "avecQui": "Calmettes Michel, Dupont Philippe"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B013": {
+      "nom": "Claverie",
+      "prenom": "Stéphane",
+      "total": 16,
+      "jours": [
+        {"jour": "Samedi", "total": 16, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi/Soir", "hd": "08:00", "hf": "23:30", "numero": "S03", "titre": "Photos", "commentaire": "Lieu : Salle des Fêtes - Sainte Foy\nPhotographier la préparation, les courses, les podiums, la soirée et l'ambiance", "duree": 15.5, "couleur": "#00B0F0", "avecQui": "Claverie Stéphane, Laché Cyrille"}
+        ]}
+      ]
+    },
+    "B014": {
+      "nom": "Claverie",
+      "prenom": "Emmanuelle",
+      "total": 3,
+      "jours": [
+        {"jour": "Vendredi", "total": 3, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "V05", "titre": "Préparation sacs coureurs et bénévoles", "commentaire": "Lieu : Salle des Fêtes\nTickets repas ( Bénévoles, Coureurs, Groupe, Invités et Vente ) nombre à confirmer\nCoureurs : N° dossard sur le sac, miel, 4 épingles, ticket repas (si inscrit), achat miel sup et carte de visite et flyers\nLes ranger par course et N° \nBénévoles : Petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et un buff. Le sandwich sera fait samedi\nMettre les étiquettes sur les écocups de la course\nPréparation des poches podiums", "duree": 3, "couleur": "#0072B2", "avecQui": "Claverie Emmanuelle, Dupont Geneviève, Lavigne Gérard, Lavigne Martine, Vuillemin Nicole"}
+        ]}
+      ]
+    },
+    "B015": {
+      "nom": "Colomb",
+      "prenom": "Lucie",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S26", "titre": "Sécurité Parcours P6 Equipe 1", "commentaire": "Tennis + Toilettes coureurs\nUniquement les coureurs utilisent ces toilettes\nVérifier de temps en temps qu'il ne manque rien\n11h30-12h00: Mise en place des barrières et rubalises\n     Mise en place des poubelles (voir plan)", "duree": 3, "couleur": "#7030A0", "avecQui": "Colomb Lucie, Cornille Solène"},
+          {"periode": "Après-midi", "hd": "14:30", "hf": "15:00", "numero": "S58", "titre": "Installation du podium", "commentaire": "Lieu : Place salle des Fêtes\nInstallation du podium\nCacher les roues avec la nappe noire\nmettre  une table\nmettre en place les affiches des partenaires ", "duree": .5, "couleur": "#92A8D1", "avecQui": "Colomb Lucie, Morin Caroline, Odouard Dominique, Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S45", "titre": "Sécurité Parcours P2 Equipe 3", "commentaire": "Rond point avenue Victor Molinier / rue Alain Saint Paul\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#F0E442", "avecQui": "Colomb Lucie, Cornille Solène"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "21:00", "hf": "23:00", "numero": "S70", "titre": "Vérification et service", "commentaire": "Lieu : Salle des Fêtes\nMettre le café en route\nVérifier l'eau, le pain, le vin\nAider au service du dessert si possible", "duree": 2, "couleur": "#0072B2", "avecQui": "Colomb Lucie, Lagarrigue Marie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B016": {
+      "nom": "Cornille",
+      "prenom": "Solène",
+      "total": 10.5,
+      "jours": [
+        {"jour": "Samedi", "total": 10.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:00", "hf": "10:00", "numero": "S08", "titre": "Finir les sacs coureurs et distribution", "commentaire": "Lieu : Salle des Fêtes\nFinir les sacs si besoin et les vérifier ( voir la liste en V05 )\nPréparer le poste de remise des dossards ", "duree": 1, "couleur": "#88B04B", "avecQui": "Beaules Manon, Cornille Solène, Roca Christophe"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S26", "titre": "Sécurité Parcours P6 Equipe 1", "commentaire": "Tennis + Toilettes coureurs\nUniquement les coureurs utilisent ces toilettes\nVérifier de temps en temps qu'il ne manque rien\n11h30-12h00: Mise en place des barrières et rubalises\n     Mise en place des poubelles (voir plan)", "duree": 3, "couleur": "#7030A0", "avecQui": "Colomb Lucie, Cornille Solène"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S45", "titre": "Sécurité Parcours P2 Equipe 3", "commentaire": "Rond point avenue Victor Molinier / rue Alain Saint Paul\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#F0E442", "avecQui": "Colomb Lucie, Cornille Solène"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Après-midi/Soir", "hd": "20:00", "hf": "20:30", "numero": "S67", "titre": "Démontage buvette", "commentaire": "Lieu : Place salle des Fêtes\nSerge Vigier gère ce poste\nRanger les boissons\nRanger les tireuses\ndémonter la structure\ntout mettre dans la salle du foot", "duree": .5, "couleur": "#56B4E9", "avecQui": "Authier Laurent, Beaules Léon, Cornille Solène, Vigier Serge"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B017": {
+      "nom": "Couderc",
+      "prenom": "Alain",
+      "total": 15.5,
+      "jours": [
+        {"jour": "Samedi", "total": 12.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S11", "titre": "Mise en place de la buvette", "commentaire": "Lieu : Place salle des Fêtes\nMonter la structure ( Serge Vigier gère le montage et la mise en place )\nMettre en route la tireuse\nPréparer les bacs et le frigo\n….", "duree": 1.5, "couleur": "#955251", "avecQui": "Couderc Alain, Duverneuil Mathieu, Odouard Dominique, Vigier Serge"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S18", "titre": "Gestion buvettte Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#E69F00", "avecQui": "Couderc Alain, Guirard Daniel, Vigier Serge, Vigier Nathalie"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "S38", "titre": "Gestion buvettte Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#DD4124", "avecQui": "Couderc Alain, Dupont Geneviève, Guirard Daniel, Idoux Cécile"},
+          {"periode": "Après-midi", "hd": "17:00", "hf": "20:00", "numero": "S55", "titre": "Gestion buvettte Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#6B5B95", "avecQui": "Couderc Alain, Lagarrigue Marie, Vigier Serge, Vuillemin Marc"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D01", "titre": "Nettoyage parcours", "commentaire": "Lieu : Place de la salle des Fêtes - Parcours\nRetirer la rubalise\nvérifier rangement de barrières\nramasser les déchets\nramasser les piquets et les rapporter à Gilbert", "duree": 3, "couleur": "#A9D08E", "avecQui": "Bouloc Laurent, Couderc Alain, Dal Corso Christian, Vuillemin Marc"}
+        ]}
+      ]
+    },
+    "B018": {
+      "nom": "Dal Corso",
+      "prenom": "Domy",
+      "total": 13.5,
+      "jours": [
+        {"jour": "Samedi", "total": 13.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S16", "titre": "Mettre en place le ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nInstaller les écocups par numéro\nInstaller le solide et le liquide\nMise en place pub partenaires ( banderole, Affiches )", "duree": 1, "couleur": "#EFC050", "avecQui": "Bouloc Véronique, Dal Corso Domy, Delmas Elisabeth, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:30", "hf": "14:00", "numero": "S28", "titre": "Ravitaillement Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2.5, "couleur": "#FFC000", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "19:00", "numero": "S50", "titre": "Ravitaillement Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 3, "couleur": "#7030A0", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B019": {
+      "nom": "Dal Corso",
+      "prenom": "Pauline",
+      "total": 9,
+      "jours": [
+        {"jour": "Samedi", "total": 9, "taches": [
+          {"periode": "Matin/Après-midi", "hd": "11:30", "hf": "14:00", "numero": "S28", "titre": "Ravitaillement Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2.5, "couleur": "#FFC000", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "19:00", "numero": "S50", "titre": "Ravitaillement Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 3, "couleur": "#7030A0", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B020": {
+      "nom": "Dal Corso",
+      "prenom": "Christian",
+      "total": 17.5,
+      "jours": [
+        {"jour": "Vendredi", "total": 8, "taches": [
+          {"periode": "Matin", "hd": "08:00", "hf": "12:30", "numero": "V03", "titre": "Préparation Parcours & Parking", "commentaire": "Lieu : Salle des Fêtes - Sainte Foy\nRécupérer les piquets chez Gilbert\nDélimiter tout le tour du parking\nDélimiter le parcours au parc, tennis et remontée, place de la mairie\nVérifier les barrières", "duree": 4.5, "couleur": "#009E73", "avecQui": "Dal Corso Christian, Dupont Philippe, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "V04", "titre": "Matériels, marchandises et sacs coureurs", "commentaire": "Lieu : Salle des Fêtes et salle du foot\nRécéptionner les livraisons et ranger aux frigos\nRécupérer la cafetière du comité des fêtes\nPréparation des sacs coureurs en attendant", "duree": 3, "couleur": "#F0E442", "avecQui": "Dal Corso Christian, Gombert Eric"},
+          {"periode": "Après-midi", "hd": "17:00", "hf": "17:30", "numero": "V07", "titre": "Préparer la machine à café", "commentaire": "Lieu : Salle des Fêtes\nPréparer la machine à café et la mettre sur une prise programmée à 6h30", "duree": .5, "couleur": "#CC79A7", "avecQui": "Dal Corso Christian"}
+        ]},
+        {"jour": "Samedi", "total": 3.5, "taches": [
+          {"periode": "Matin", "hd": "07:00", "hf": "07:30", "numero": "S01", "titre": "Petit déjeuner Bénévoles", "commentaire": "Lieu : Salle des Fêtes\nRécupérer les viennoiseries (70 croissants), le pain (40 baguettes) et faire le café", "duree": .5, "couleur": "#999999", "avecQui": "Dal Corso Christian, Dupont Philippe, Dupont Geneviève"},
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "10:00", "numero": "S12", "titre": "Prépa Speakers / Sono", "commentaire": "Lieu : Place salle des Fêtes\nCoordination Speaker et Stc Sono\nFaire le point avec Christian sur le doc d'info course, partenaires et coureurs", "duree": .5, "couleur": "#B565A7", "avecQui": "Dal Corso Christian, Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Matin", "hd": "11:30", "hf": "12:00", "numero": "S29", "titre": "Breafing 6h", "commentaire": "Lieu : Place salle des Fêtes\nBreafing 6h + départ 12h00", "duree": .5, "couleur": "#A9D08E", "avecQui": "Dal Corso Christian"},
+          {"periode": "Après-midi", "hd": "14:30", "hf": "15:00", "numero": "S40", "titre": "Breafing 3h", "commentaire": "Lieu : Place salle des Fêtes\nBreafing 3h + départ 15h00", "duree": .5, "couleur": "#EFC050", "avecQui": "Dal Corso Christian"},
+          {"periode": "Après-midi", "hd": "16:30", "hf": "17:00", "numero": "S53", "titre": "Breafing 1h", "commentaire": "Lieu : Place salle des Fêtes\nBreafing 1h + départ 17h00", "duree": .5, "couleur": "#A9D08E", "avecQui": "Dal Corso Christian"},
+          {"periode": "Soir", "hd": "21:30", "hf": "22:00", "numero": "S71", "titre": "Remise prix", "commentaire": "Lieu : Salle des Fêtes\nRemise trophées partenaires et …", "duree": .5, "couleur": "#D55E00", "avecQui": "Dal Corso Christian"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D01", "titre": "Nettoyage parcours", "commentaire": "Lieu : Place de la salle des Fêtes - Parcours\nRetirer la rubalise\nvérifier rangement de barrières\nramasser les déchets\nramasser les piquets et les rapporter à Gilbert", "duree": 3, "couleur": "#A9D08E", "avecQui": "Bouloc Laurent, Couderc Alain, Dal Corso Christian, Vuillemin Marc"}
+        ]},
+        {"jour": "Lundi", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "L01", "titre": "Rendre le matériel", "commentaire": "Lieu : Salle des Fêtes et salle du foot\nRendre le matériel aux fournisseurs\nvoir avec eux pour les heures", "duree": 3, "couleur": "#6B5B95", "avecQui": "Bahurlet Gisèle, Dal Corso Christian"}
+        ]}
+      ]
+    },
+    "B021": {
+      "nom": "Delmas",
+      "prenom": "Elisabeth",
+      "total": 5.5,
+      "jours": [
+        {"jour": "Samedi", "total": 5.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S16", "titre": "Mettre en place le ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nInstaller les écocups par numéro\nInstaller le solide et le liquide\nMise en place pub partenaires ( banderole, Affiches )", "duree": 1, "couleur": "#EFC050", "avecQui": "Bouloc Véronique, Dal Corso Domy, Delmas Elisabeth, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S33", "titre": "Sécurité Parcours P3 Equipe 2", "commentaire": "Croisement rue Alain Saint Paul / rue 19 mars 1962", "duree": 2, "couleur": "#F7CAC9", "avecQui": "Delmas Elisabeth, Lagarrigue Sylvie"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B022": {
+      "nom": "Dupont",
+      "prenom": "Philippe",
+      "total": 20.5,
+      "jours": [
+        {"jour": "Vendredi", "total": 6.5, "taches": [
+          {"periode": "Matin", "hd": "08:00", "hf": "12:30", "numero": "V03", "titre": "Préparation Parcours & Parking", "commentaire": "Lieu : Salle des Fêtes - Sainte Foy\nRécupérer les piquets chez Gilbert\nDélimiter tout le tour du parking\nDélimiter le parcours au parc, tennis et remontée, place de la mairie\nVérifier les barrières", "duree": 4.5, "couleur": "#009E73", "avecQui": "Dal Corso Christian, Dupont Philippe, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "V06", "titre": "Mise en place des panneaux", "commentaire": "Lieu : Salle des Fêtes - Sainte Foy\nPlacer pour le samedi les panneaux de déviation et routes barrées\nFinaliser balisage parcours", "duree": 2, "couleur": "#D55E00", "avecQui": "Dupont Philippe, Vuillemin Marc"}
+        ]},
+        {"jour": "Samedi", "total": 14, "taches": [
+          {"periode": "Matin", "hd": "07:00", "hf": "07:30", "numero": "S01", "titre": "Petit déjeuner Bénévoles", "commentaire": "Lieu : Salle des Fêtes\nRécupérer les viennoiseries (70 croissants), le pain (40 baguettes) et faire le café", "duree": .5, "couleur": "#999999", "avecQui": "Dal Corso Christian, Dupont Philippe, Dupont Geneviève"},
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "09:00", "numero": "S04", "titre": "Mise en place éléctricité", "commentaire": "Lieu : Place salle des Fêtes\nTirer une rallonge du coffret de la salle au parc en aérien\nTirer une rallonge des vestiaires au milieu du terrain de foot\nPosition : voir avec Michel Berardo", "duree": 1, "couleur": "#FFC000", "avecQui": "Authier Laurent, Dupont Philippe, Roca Christophe"},
+          {"periode": "Matin/Après-midi/Soir", "hd": "10:00", "hf": "20:30", "numero": "S17", "titre": "Repas", "commentaire": "Lieu : Salle des Fêtes\nPréparation du repas", "duree": 10.5, "couleur": "#5B5EA6", "avecQui": "Calmettes Michel, Dupont Philippe"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B023": {
+      "nom": "Dupont",
+      "prenom": "Geneviève",
+      "total": 13.5,
+      "jours": [
+        {"jour": "Vendredi", "total": 3, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "V05", "titre": "Préparation sacs coureurs et bénévoles", "commentaire": "Lieu : Salle des Fêtes\nTickets repas ( Bénévoles, Coureurs, Groupe, Invités et Vente ) nombre à confirmer\nCoureurs : N° dossard sur le sac, miel, 4 épingles, ticket repas (si inscrit), achat miel sup et carte de visite et flyers\nLes ranger par course et N° \nBénévoles : Petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et un buff. Le sandwich sera fait samedi\nMettre les étiquettes sur les écocups de la course\nPréparation des poches podiums", "duree": 3, "couleur": "#0072B2", "avecQui": "Claverie Emmanuelle, Dupont Geneviève, Lavigne Gérard, Lavigne Martine, Vuillemin Nicole"}
+        ]},
+        {"jour": "Samedi", "total": 10.5, "taches": [
+          {"periode": "Matin", "hd": "07:00", "hf": "07:30", "numero": "S01", "titre": "Petit déjeuner Bénévoles", "commentaire": "Lieu : Salle des Fêtes\nRécupérer les viennoiseries (70 croissants), le pain (40 baguettes) et faire le café", "duree": .5, "couleur": "#999999", "avecQui": "Dal Corso Christian, Dupont Philippe, Dupont Geneviève"},
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "S07", "titre": "Petit déjeuner coureurs", "commentaire": "Lieu : Salle des Fêtes\nMettre en place deux tables  avec café + 4/4 + jus de fruit + gobelet + sucre ( laisser à dispo à la salle sur une table et vérifier )\nVérifier et renseigner les gens si besoin\nEn parallèle aider l'équipe Casse-Croûte Bénévole ( S13 )", "duree": 3, "couleur": "#6B5B95", "avecQui": "Dupont Geneviève"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "S38", "titre": "Gestion buvettte Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#DD4124", "avecQui": "Couderc Alain, Dupont Geneviève, Guirard Daniel, Idoux Cécile"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "22:00", "hf": "23:00", "numero": "S75", "titre": "Service Gâteau", "commentaire": "Lieu : Salle des Fêtes\nServir la tarte aux pommes dans les assiettes et les donner aux personnes\nsur la fin les mettre dans les assiettes et les poser sur une table", "duree": 1, "couleur": "#00B0F0", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Manon, Bouloc Laurent, Dupont Geneviève"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B024": {
+      "nom": "Duverneuil",
+      "prenom": "Mathieu",
+      "total": 2.5,
+      "jours": [
+        {"jour": "Samedi", "total": 2.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S11", "titre": "Mise en place de la buvette", "commentaire": "Lieu : Place salle des Fêtes\nMonter la structure ( Serge Vigier gère le montage et la mise en place )\nMettre en route la tireuse\nPréparer les bacs et le frigo\n….", "duree": 1.5, "couleur": "#955251", "avecQui": "Couderc Alain, Duverneuil Mathieu, Odouard Dominique, Vigier Serge"},
+          {"periode": "Matin", "hd": "11:30", "hf": "12:00", "numero": "S27", "titre": "Panneaux déviations début", "commentaire": "Fermeture de la circulation Rond point SPAR et Statue de la vierge à 11h30\nFermeture de l'av Joseph Huc et Vitor Molinier à 11h30\nMise en place des panneaux de déviation", "duree": .5, "couleur": "#00B0F0", "avecQui": "Bouloc Laurent, Duverneuil Mathieu, Lavigne Gérard, Vuillemin Marc"}
+        ]}
+      ]
+    },
+    "B025": {
+      "nom": "Giambra",
+      "prenom": "Cathy",
+      "total": 9,
+      "jours": [
+        {"jour": "Samedi", "total": 9, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S21", "titre": "Sécurité Parcours P1 Equipe 1", "commentaire": "Place de la mairie et de l'église\n11h30-12h00: Mise en place des barrières et rubalises", "duree": 3, "couleur": "#F0E442", "avecQui": "Giambra Cathy, Morin Caroline"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S49", "titre": "Sécurité Parcours P6 Equipe 3", "commentaire": "Tennis + Toilettes coureurs\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise\nRemonter les conteneurs à la salle", "duree": 2.5, "couleur": "#999999", "avecQui": "Giambra Cathy, Legriel Caula Sophie, Morin Caroline"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B026": {
+      "nom": "Gombert",
+      "prenom": "Eric",
+      "total": 10,
+      "jours": [
+        {"jour": "Vendredi", "total": 3, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "V04", "titre": "Matériels, marchandises et sacs coureurs", "commentaire": "Lieu : Salle des Fêtes et salle du foot\nRécéptionner les livraisons et ranger aux frigos\nRécupérer la cafetière du comité des fêtes\nPréparation des sacs coureurs en attendant", "duree": 3, "couleur": "#F0E442", "avecQui": "Dal Corso Christian, Gombert Eric"}
+        ]},
+        {"jour": "Samedi", "total": 4, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S05", "titre": "Structure ravitaillement ", "commentaire": "Lieu : Place salle des Fêtes\nInstallation Barnum 10x5 ( Alain Morin gère le montage )\nMise en place des poids\nMise en place des tables\nMise en place des supports pour les écocups ( Alain Morin  )", "duree": 2, "couleur": "#A9D08E", "avecQui": "Authier Maxime, Bouloc Laurent, Gombert Eric, Martineau Loïc, Morin Alain, Vuillemin Marc"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D02", "titre": "Salle des fêtes", "commentaire": "Lieu : Salle des Fêtes\nNettoyer la vaisselle\nranger le matériel\nranger la nourriture et faire le bilan\nBilan des boissons\nmettre de côté tout ce qui doit être rendu aux fournisseurs", "duree": 3, "couleur": "#FF6F61", "avecQui": "Authier Laure, Authier Laurent, Gombert Eric, Gombert Sylvie, Lavigne Gérard, Lavigne Martine, Roca Christophe"}
+        ]}
+      ]
+    },
+    "B027": {
+      "nom": "Gombert",
+      "prenom": "Sylvie",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 8.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S13", "titre": "Casse-croûte bénévoles", "commentaire": "Lieu : Salle des Fêtes\nFaire les sandwichs\nfinir les sacs (sandwich, petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et cadeaux buff et écocup)\nDistribution des premiers à partir de 10h30 ( bénévole du parcours )", "duree": 1.5, "couleur": "#009B77", "avecQui": "Authier Laure, Gombert Sylvie, Lagarrigue Sylvie, Legriel Caula Sophie, Morin Caroline, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Matin", "hd": "11:00", "hf": "12:00", "numero": "S74", "titre": "Finaliser Casse-croûte", "commentaire": "Lieu : Salle des Fêtes\nFaire le point et finaliser si besoin\nDistribution", "duree": 1, "couleur": "#7030A0", "avecQui": "Gombert Sylvie, Lagarrigue Sylvie"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:00", "numero": "S68", "titre": "Récupérer le pain et les tartes", "commentaire": "lieu : Place de la salle des fêtes\nRécupérer le pain ( 50 baguettes )\nRécupérer les tartes aux pommes ( x plaques )\nPhilippe le boulanger les amène sur la place avec le camion.\nOn lui offre une bière en remerciement", "duree": .5, "couleur": "#009E73", "avecQui": "Beaules Manon, Gombert Sylvie"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D02", "titre": "Salle des fêtes", "commentaire": "Lieu : Salle des Fêtes\nNettoyer la vaisselle\nranger le matériel\nranger la nourriture et faire le bilan\nBilan des boissons\nmettre de côté tout ce qui doit être rendu aux fournisseurs", "duree": 3, "couleur": "#FF6F61", "avecQui": "Authier Laure, Authier Laurent, Gombert Eric, Gombert Sylvie, Lavigne Gérard, Lavigne Martine, Roca Christophe"}
+        ]}
+      ]
+    },
+    "B028": {
+      "nom": "Guirard",
+      "prenom": "Daniel",
+      "total": 9.5,
+      "jours": [
+        {"jour": "Samedi", "total": 9.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S18", "titre": "Gestion buvettte Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#E69F00", "avecQui": "Couderc Alain, Guirard Daniel, Vigier Serge, Vigier Nathalie"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "S38", "titre": "Gestion buvettte Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#DD4124", "avecQui": "Couderc Alain, Dupont Geneviève, Guirard Daniel, Idoux Cécile"},
+          {"periode": "Après-midi", "hd": "17:00", "hf": "17:30", "numero": "S54", "titre": "Accueil Groupe Banda ", "commentaire": "Lieu : Parking de la boulangerie\nAccueil Groupe Banda Bisto de Nasmise en place pour 17h30 ", "duree": .5, "couleur": "#FF6F61", "avecQui": "Guirard Daniel"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B029": {
+      "nom": "Laché",
+      "prenom": "Cyrille",
+      "total": 16,
+      "jours": [
+        {"jour": "Samedi", "total": 16, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi/Soir", "hd": "08:00", "hf": "23:30", "numero": "S03", "titre": "Photos", "commentaire": "Lieu : Salle des Fêtes - Sainte Foy\nPhotographier la préparation, les courses, les podiums, la soirée et l'ambiance", "duree": 15.5, "couleur": "#00B0F0", "avecQui": "Claverie Stéphane, Laché Cyrille"}
+        ]}
+      ]
+    },
+    "B030": {
+      "nom": "Lagarrigue",
+      "prenom": "Sylvie",
+      "total": 9.5,
+      "jours": [
+        {"jour": "Samedi", "total": 9.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S13", "titre": "Casse-croûte bénévoles", "commentaire": "Lieu : Salle des Fêtes\nFaire les sandwichs\nfinir les sacs (sandwich, petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et cadeaux buff et écocup)\nDistribution des premiers à partir de 10h30 ( bénévole du parcours )", "duree": 1.5, "couleur": "#009B77", "avecQui": "Authier Laure, Gombert Sylvie, Lagarrigue Sylvie, Legriel Caula Sophie, Morin Caroline, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Matin", "hd": "11:00", "hf": "12:00", "numero": "S74", "titre": "Finaliser Casse-croûte", "commentaire": "Lieu : Salle des Fêtes\nFaire le point et finaliser si besoin\nDistribution", "duree": 1, "couleur": "#7030A0", "avecQui": "Gombert Sylvie, Lagarrigue Sylvie"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S33", "titre": "Sécurité Parcours P3 Equipe 2", "commentaire": "Croisement rue Alain Saint Paul / rue 19 mars 1962", "duree": 2, "couleur": "#F7CAC9", "avecQui": "Delmas Elisabeth, Lagarrigue Sylvie"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:30", "numero": "S61", "titre": "Repas Banda", "commentaire": "Lieu : Salle des Fêtes\nService du groupe de bandas\nprépation de la table vin, eau, pain et café\nNettoyage de la table des bandas", "duree": 1, "couleur": "#009B77", "avecQui": "Authier Laure, Lagarrigue Sylvie, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B031": {
+      "nom": "Lagarrigue",
+      "prenom": "Marie",
+      "total": 9.5,
+      "jours": [
+        {"jour": "Samedi", "total": 9.5, "taches": [
+          {"periode": "Après-midi", "hd": "13:00", "hf": "15:00", "numero": "S30", "titre": "Remise des dossards 3h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#FF6F61", "avecQui": "Lagarrigue Marie, Legriel Caula Sophie, Vuillemin Nicole"},
+          {"periode": "Après-midi", "hd": "15:00", "hf": "17:00", "numero": "S41", "titre": "Remise des dossards 1h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#5B5EA6", "avecQui": "Lagarrigue Marie, Vuillemin Nicole, Calmettes Véronique"},
+          {"periode": "Après-midi", "hd": "17:00", "hf": "20:00", "numero": "S55", "titre": "Gestion buvettte Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#6B5B95", "avecQui": "Couderc Alain, Lagarrigue Marie, Vigier Serge, Vuillemin Marc"},
+          {"periode": "Soir", "hd": "21:00", "hf": "23:00", "numero": "S70", "titre": "Vérification et service", "commentaire": "Lieu : Salle des Fêtes\nMettre le café en route\nVérifier l'eau, le pain, le vin\nAider au service du dessert si possible", "duree": 2, "couleur": "#0072B2", "avecQui": "Colomb Lucie, Lagarrigue Marie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B032": {
+      "nom": "Lavigne",
+      "prenom": "Gérard",
+      "total": 15,
+      "jours": [
+        {"jour": "Vendredi", "total": 5, "taches": [
+          {"periode": "Matin", "hd": "06:00", "hf": "07:00", "numero": "V01", "titre": "Récupérer le Barnum (Gérard Jeudi)", "commentaire": "Aller récupérer le barnum et les planches à gobelets chez Norbert\nGérard va le récuperer Jeudi matin avec le camion de la mairie", "duree": 1, "couleur": "#E69F00", "avecQui": "Lavigne Gérard"},
+          {"periode": "Matin", "hd": "07:00", "hf": "08:00", "numero": "V02", "titre": "Clés et Arrêtés  (Gérard Jeudi)", "commentaire": "Gérarad récupère jeudi à la mairie les clés Salle des fêtes, salle du foot, local comité des fêtes, toilettes tennis, vestiaire foot, coffret électrique, Papier de toilette + clés distributeurs, micros salle des fêtes et arrêtés", "duree": 1, "couleur": "#56B4E9", "avecQui": "Lavigne Gérard"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "V05", "titre": "Préparation sacs coureurs et bénévoles", "commentaire": "Lieu : Salle des Fêtes\nTickets repas ( Bénévoles, Coureurs, Groupe, Invités et Vente ) nombre à confirmer\nCoureurs : N° dossard sur le sac, miel, 4 épingles, ticket repas (si inscrit), achat miel sup et carte de visite et flyers\nLes ranger par course et N° \nBénévoles : Petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et un buff. Le sandwich sera fait samedi\nMettre les étiquettes sur les écocups de la course\nPréparation des poches podiums", "duree": 3, "couleur": "#0072B2", "avecQui": "Claverie Emmanuelle, Dupont Geneviève, Lavigne Gérard, Lavigne Martine, Vuillemin Nicole"}
+        ]},
+        {"jour": "Samedi", "total": 7, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S10", "titre": "Récuperer la remorque Chez Alain", "commentaire": "Récuperer la remorque Chez Alain", "duree": 1, "couleur": "#92A8D1", "avecQui": "Lavigne Gérard, Vuillemin Marc"},
+          {"periode": "Matin", "hd": "11:30", "hf": "12:00", "numero": "S27", "titre": "Panneaux déviations début", "commentaire": "Fermeture de la circulation Rond point SPAR et Statue de la vierge à 11h30\nFermeture de l'av Joseph Huc et Vitor Molinier à 11h30\nMise en place des panneaux de déviation", "duree": .5, "couleur": "#00B0F0", "avecQui": "Bouloc Laurent, Duverneuil Mathieu, Lavigne Gérard, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S35", "titre": "Sécurité Parcours P5 Equipe 2", "commentaire": "Bas du cimetière / rue Guillaume Appolinaire et rue Claude Nougaro\nPour info circulation alternée sur cette zone", "duree": 2, "couleur": "#955251", "avecQui": "Lavigne Gérard, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D02", "titre": "Salle des fêtes", "commentaire": "Lieu : Salle des Fêtes\nNettoyer la vaisselle\nranger le matériel\nranger la nourriture et faire le bilan\nBilan des boissons\nmettre de côté tout ce qui doit être rendu aux fournisseurs", "duree": 3, "couleur": "#FF6F61", "avecQui": "Authier Laure, Authier Laurent, Gombert Eric, Gombert Sylvie, Lavigne Gérard, Lavigne Martine, Roca Christophe"}
+        ]}
+      ]
+    },
+    "B033": {
+      "nom": "Lavigne",
+      "prenom": "Martine",
+      "total": 7.5,
+      "jours": [
+        {"jour": "Vendredi", "total": 3, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "V05", "titre": "Préparation sacs coureurs et bénévoles", "commentaire": "Lieu : Salle des Fêtes\nTickets repas ( Bénévoles, Coureurs, Groupe, Invités et Vente ) nombre à confirmer\nCoureurs : N° dossard sur le sac, miel, 4 épingles, ticket repas (si inscrit), achat miel sup et carte de visite et flyers\nLes ranger par course et N° \nBénévoles : Petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et un buff. Le sandwich sera fait samedi\nMettre les étiquettes sur les écocups de la course\nPréparation des poches podiums", "duree": 3, "couleur": "#0072B2", "avecQui": "Claverie Emmanuelle, Dupont Geneviève, Lavigne Gérard, Lavigne Martine, Vuillemin Nicole"}
+        ]},
+        {"jour": "Samedi", "total": 1.5, "taches": [
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D02", "titre": "Salle des fêtes", "commentaire": "Lieu : Salle des Fêtes\nNettoyer la vaisselle\nranger le matériel\nranger la nourriture et faire le bilan\nBilan des boissons\nmettre de côté tout ce qui doit être rendu aux fournisseurs", "duree": 3, "couleur": "#FF6F61", "avecQui": "Authier Laure, Authier Laurent, Gombert Eric, Gombert Sylvie, Lavigne Gérard, Lavigne Martine, Roca Christophe"}
+        ]}
+      ]
+    },
+    "B034": {
+      "nom": "Legriel",
+      "prenom": "Sébastien",
+      "total": 10,
+      "jours": [
+        {"jour": "Samedi", "total": 10, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin", "hd": "11:30", "hf": "12:30", "numero": "S73", "titre": "Vérification Parcours", "commentaire": "Lieu : Salle des Fêtes - Parcours\nFaire le tour du parcours\nVérifier les barrières et rubalises\nVérifier que les postes sont en place\nVoir s'il ne manque rien", "duree": 1, "couleur": "#999999", "avecQui": "Legriel Sébastien, Morin Alain"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S34", "titre": "Sécurité Parcours P4 Equipe 2", "commentaire": "Croisement rue 19 mars 1962 / rue Guillaume Appolinaire\nPour info circulation alternée sur cette zone", "duree": 2, "couleur": "#92A8D1", "avecQui": "Authier Laurent, Legriel Sébastien"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi/Soir", "hd": "18:30", "hf": "20:30", "numero": "S62", "titre": "Service Apéro", "commentaire": "Lieu : Place salle des Fêtes\nPréparation\nMise en place des tables ( recup celles des coureurs )\nMise en place apéro\nRangement", "duree": 2, "couleur": "#DD4124", "avecQui": "Legriel Sébastien, Idoux Cécile, Gautier Jean-Marc"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B035": {
+      "nom": "Legriel Caula",
+      "prenom": "Sophie",
+      "total": 7,
+      "jours": [
+        {"jour": "Samedi", "total": 7, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S13", "titre": "Casse-croûte bénévoles", "commentaire": "Lieu : Salle des Fêtes\nFaire les sandwichs\nfinir les sacs (sandwich, petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et cadeaux buff et écocup)\nDistribution des premiers à partir de 10h30 ( bénévole du parcours )", "duree": 1.5, "couleur": "#009B77", "avecQui": "Authier Laure, Gombert Sylvie, Lagarrigue Sylvie, Legriel Caula Sophie, Morin Caroline, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "13:00", "hf": "15:00", "numero": "S30", "titre": "Remise des dossards 3h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#FF6F61", "avecQui": "Lagarrigue Marie, Legriel Caula Sophie, Vuillemin Nicole"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S49", "titre": "Sécurité Parcours P6 Equipe 3", "commentaire": "Tennis + Toilettes coureurs\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise\nRemonter les conteneurs à la salle", "duree": 2.5, "couleur": "#999999", "avecQui": "Giambra Cathy, Legriel Caula Sophie, Morin Caroline"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B036": {
+      "nom": "Long",
+      "prenom": "Véronique",
+      "total": 10.5,
+      "jours": [
+        {"jour": "Samedi", "total": 10.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S16", "titre": "Mettre en place le ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nInstaller les écocups par numéro\nInstaller le solide et le liquide\nMise en place pub partenaires ( banderole, Affiches )", "duree": 1, "couleur": "#EFC050", "avecQui": "Bouloc Véronique, Dal Corso Domy, Delmas Elisabeth, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:30", "hf": "14:00", "numero": "S28", "titre": "Ravitaillement Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2.5, "couleur": "#FFC000", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S36", "titre": "Sécurité Parcours P6 Equipe 2", "commentaire": "Tennis + Toilettes coureurs ", "duree": 2, "couleur": "#B565A7", "avecQui": "Boudot Sylvie, Long Véronique"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "19:00", "numero": "S50", "titre": "Ravitaillement Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 3, "couleur": "#7030A0", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B037": {
+      "nom": "Martin",
+      "prenom": "François",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "10:00", "numero": "S12", "titre": "Prépa Speakers / Sono", "commentaire": "Lieu : Place salle des Fêtes\nCoordination Speaker et Stc Sono\nFaire le point avec Christian sur le doc d'info course, partenaires et coureurs", "duree": .5, "couleur": "#B565A7", "avecQui": "Dal Corso Christian, Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Matin/Après-midi", "hd": "10:00", "hf": "19:00", "numero": "S15", "titre": "Animation Speaker Place ", "commentaire": "Lieu : Place salle des Fêtes\nAnimation de la course\nPrésentation des coureurs\nPrésentation des partenaires\nPrésentation des bénévoles\nblablabla …\nJe vous fais confiance", "duree": 9, "couleur": "#45B8AC", "avecQui": "Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "20:00", "numero": "S65", "titre": "Podium Animation", "commentaire": "Lieu : Place salle des Fêtes\nAnimation Speaker vous choisissez qui fait quoi", "duree": 1, "couleur": "#5B5EA6", "avecQui": "Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B038": {
+      "nom": "Martineau",
+      "prenom": "Loïc",
+      "total": 9.5,
+      "jours": [
+        {"jour": "Samedi", "total": 9.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S05", "titre": "Structure ravitaillement ", "commentaire": "Lieu : Place salle des Fêtes\nInstallation Barnum 10x5 ( Alain Morin gère le montage )\nMise en place des poids\nMise en place des tables\nMise en place des supports pour les écocups ( Alain Morin  )", "duree": 2, "couleur": "#A9D08E", "avecQui": "Authier Maxime, Bouloc Laurent, Gombert Eric, Martineau Loïc, Morin Alain, Vuillemin Marc"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S24", "titre": "Sécurité Parcours P4 Equipe 1", "commentaire": "Croisement rue 19 mars 1962 / rue Guillaume Appolinaire\n11h30-12h00: Mise en place des barrières et ruubalises\nCirculation alternée sur cette zone à gérer avec le poste d'après P5", "duree": 3, "couleur": "#CC79A7", "avecQui": "Martineau Loïc, Roca Christophe"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S48", "titre": "Sécurité Parcours P5 Equipe 3", "commentaire": "Bas du cimetière / rue Guillaume Appolinaire et rue Claude Nougaro\nPour info circulation alternée sur cette zone\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#CC79A7", "avecQui": "Martineau Loïc, Roca Christophe"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S60", "titre": "Panneaux déviations fin", "commentaire": "Lieu : Place salle des Fêtes - Sainte Foy\nRéouverture de l'av Joseph Huc et Vitor Molinier à 18h30\nRécupération des panneaux de déviations", "duree": .5, "couleur": "#B565A7", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Martineau Loïc"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B039": {
+      "nom": "Mayonove",
+      "prenom": "Damien",
+      "total": 5,
+      "jours": [
+        {"jour": "Samedi", "total": 5, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "15:00", "numero": "S39", "titre": "Animation Mobile 1", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 1", "duree": 1, "couleur": "#45B8AC", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "15:30", "hf": "16:30", "numero": "S43", "titre": "Animation Mobile 2", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 2", "duree": 1, "couleur": "#56B4E9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S57", "titre": "Animation Mobile 3", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 3", "duree": 1, "couleur": "#F7CAC9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:00", "numero": "S59", "titre": "Récupérer les pizzas ", "commentaire": "lieu : Chez Dany\nRécupérer 6 plaques de pizzas pour l'apéro chez Dany", "duree": .5, "couleur": "#955251", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B040": {
+      "nom": "Morin",
+      "prenom": "Caroline",
+      "total": 9,
+      "jours": [
+        {"jour": "Samedi", "total": 9, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S13", "titre": "Casse-croûte bénévoles", "commentaire": "Lieu : Salle des Fêtes\nFaire les sandwichs\nfinir les sacs (sandwich, petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et cadeaux buff et écocup)\nDistribution des premiers à partir de 10h30 ( bénévole du parcours )", "duree": 1.5, "couleur": "#009B77", "avecQui": "Authier Laure, Gombert Sylvie, Lagarrigue Sylvie, Legriel Caula Sophie, Morin Caroline, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S21", "titre": "Sécurité Parcours P1 Equipe 1", "commentaire": "Place de la mairie et de l'église\n11h30-12h00: Mise en place des barrières et rubalises", "duree": 3, "couleur": "#F0E442", "avecQui": "Giambra Cathy, Morin Caroline"},
+          {"periode": "Après-midi", "hd": "14:30", "hf": "15:00", "numero": "S58", "titre": "Installation du podium", "commentaire": "Lieu : Place salle des Fêtes\nInstallation du podium\nCacher les roues avec la nappe noire\nmettre  une table\nmettre en place les affiches des partenaires ", "duree": .5, "couleur": "#92A8D1", "avecQui": "Colomb Lucie, Morin Caroline, Odouard Dominique, Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S49", "titre": "Sécurité Parcours P6 Equipe 3", "commentaire": "Tennis + Toilettes coureurs\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise\nRemonter les conteneurs à la salle", "duree": 2.5, "couleur": "#999999", "avecQui": "Giambra Cathy, Legriel Caula Sophie, Morin Caroline"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B041": {
+      "nom": "Morin",
+      "prenom": "Alain",
+      "total": 8.5,
+      "jours": [
+        {"jour": "Samedi", "total": 8.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S05", "titre": "Structure ravitaillement ", "commentaire": "Lieu : Place salle des Fêtes\nInstallation Barnum 10x5 ( Alain Morin gère le montage )\nMise en place des poids\nMise en place des tables\nMise en place des supports pour les écocups ( Alain Morin  )", "duree": 2, "couleur": "#A9D08E", "avecQui": "Authier Maxime, Bouloc Laurent, Gombert Eric, Martineau Loïc, Morin Alain, Vuillemin Marc"},
+          {"periode": "Matin", "hd": "11:30", "hf": "12:30", "numero": "S73", "titre": "Vérification Parcours", "commentaire": "Lieu : Salle des Fêtes - Parcours\nFaire le tour du parcours\nVérifier les barrières et rubalises\nVérifier que les postes sont en place\nVoir s'il ne manque rien", "duree": 1, "couleur": "#999999", "avecQui": "Legriel Sébastien, Morin Alain"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "15:00", "numero": "S39", "titre": "Animation Mobile 1", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 1", "duree": 1, "couleur": "#45B8AC", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "15:30", "hf": "16:30", "numero": "S43", "titre": "Animation Mobile 2", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 2", "duree": 1, "couleur": "#56B4E9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S57", "titre": "Animation Mobile 3", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 3", "duree": 1, "couleur": "#F7CAC9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:00", "numero": "S59", "titre": "Récupérer les pizzas ", "commentaire": "lieu : Chez Dany\nRécupérer 6 plaques de pizzas pour l'apéro chez Dany", "duree": .5, "couleur": "#955251", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B042": {
+      "nom": "Odouard",
+      "prenom": "Dominique",
+      "total": 9,
+      "jours": [
+        {"jour": "Samedi", "total": 9, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S11", "titre": "Mise en place de la buvette", "commentaire": "Lieu : Place salle des Fêtes\nMonter la structure ( Serge Vigier gère le montage et la mise en place )\nMettre en route la tireuse\nPréparer les bacs et le frigo\n….", "duree": 1.5, "couleur": "#955251", "avecQui": "Couderc Alain, Duverneuil Mathieu, Odouard Dominique, Vigier Serge"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S25", "titre": "Sécurité Parcours P5 Equipe 1", "commentaire": "Bas du cimetière / rue Guillaume Appolinaire et rue Claude Nougaro\n11h30-12h00: Mise en place des barrières et rubalises\nCirculation alternée sur cette zone à gérer avec le poste d'avant P4", "duree": 3, "couleur": "#999999", "avecQui": "Beaules Léon, Odouard Dominique"},
+          {"periode": "Après-midi", "hd": "14:30", "hf": "15:00", "numero": "S58", "titre": "Installation du podium", "commentaire": "Lieu : Place salle des Fêtes\nInstallation du podium\nCacher les roues avec la nappe noire\nmettre  une table\nmettre en place les affiches des partenaires ", "duree": .5, "couleur": "#92A8D1", "avecQui": "Colomb Lucie, Morin Caroline, Odouard Dominique, Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S47", "titre": "Sécurité Parcours P4 Equipe 3", "commentaire": "Croisement rue 19 mars 1962 / rue Guillaume Appolinaire\nPour info circulation alternée sur cette zone\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#D55E00", "avecQui": "Beaules Léon, Odouard Dominique"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B043": {
+      "nom": "Pallaruelo",
+      "prenom": "Françoise",
+      "total": 5,
+      "jours": [
+        {"jour": "Samedi", "total": 5, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S31", "titre": "Sécurité Parcours P1 Equipe 2", "commentaire": "Place de la mairie et de l'église", "duree": 2, "couleur": "#6B5B95", "avecQui": "Beaules Manon, Pallaruelo Françoise"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B044": {
+      "nom": "Pasquier",
+      "prenom": "Pascale",
+      "total": 10.5,
+      "jours": [
+        {"jour": "Samedi", "total": 10.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S16", "titre": "Mettre en place le ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nInstaller les écocups par numéro\nInstaller le solide et le liquide\nMise en place pub partenaires ( banderole, Affiches )", "duree": 1, "couleur": "#EFC050", "avecQui": "Bouloc Véronique, Dal Corso Domy, Delmas Elisabeth, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:30", "hf": "14:00", "numero": "S28", "titre": "Ravitaillement Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2.5, "couleur": "#FFC000", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "19:00", "numero": "S50", "titre": "Ravitaillement Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 3, "couleur": "#7030A0", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B045": {
+      "nom": "Poulain Roca",
+      "prenom": "Mélanie",
+      "total": 10,
+      "jours": [
+        {"jour": "Samedi", "total": 10, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S23", "titre": "Sécurité Parcours P3 Equipe 1", "commentaire": "Croisement rue Alain Saint Paul / rue 19 mars 1962\n11h30-12h00: Mise en place des barrières et rubalises\n     Mise en place des poubelles (voir plan)", "duree": 3, "couleur": "#D55E00", "avecQui": "Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "14:30", "hf": "15:00", "numero": "S58", "titre": "Installation du podium", "commentaire": "Lieu : Place salle des Fêtes\nInstallation du podium\nCacher les roues avec la nappe noire\nmettre  une table\nmettre en place les affiches des partenaires ", "duree": .5, "couleur": "#92A8D1", "avecQui": "Colomb Lucie, Morin Caroline, Odouard Dominique, Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S44", "titre": "Sécurité Parcours P1 Equipe 3", "commentaire": "Place de la mairie et de l'église\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#009E73", "avecQui": "Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B046": {
+      "nom": "Reina",
+      "prenom": "Christian",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "10:00", "numero": "S12", "titre": "Prépa Speakers / Sono", "commentaire": "Lieu : Place salle des Fêtes\nCoordination Speaker et Stc Sono\nFaire le point avec Christian sur le doc d'info course, partenaires et coureurs", "duree": .5, "couleur": "#B565A7", "avecQui": "Dal Corso Christian, Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Matin/Après-midi", "hd": "10:00", "hf": "19:00", "numero": "S15", "titre": "Animation Speaker Place ", "commentaire": "Lieu : Place salle des Fêtes\nAnimation de la course\nPrésentation des coureurs\nPrésentation des partenaires\nPrésentation des bénévoles\nblablabla …\nJe vous fais confiance", "duree": 9, "couleur": "#45B8AC", "avecQui": "Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "20:00", "numero": "S65", "titre": "Podium Animation", "commentaire": "Lieu : Place salle des Fêtes\nAnimation Speaker vous choisissez qui fait quoi", "duree": 1, "couleur": "#5B5EA6", "avecQui": "Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B047": {
+      "nom": "Roca",
+      "prenom": "Cathy",
+      "total": 12.5,
+      "jours": [
+        {"jour": "Samedi", "total": 12.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S16", "titre": "Mettre en place le ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nInstaller les écocups par numéro\nInstaller le solide et le liquide\nMise en place pub partenaires ( banderole, Affiches )", "duree": 1, "couleur": "#EFC050", "avecQui": "Bouloc Véronique, Dal Corso Domy, Delmas Elisabeth, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:30", "hf": "14:00", "numero": "S28", "titre": "Ravitaillement Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2.5, "couleur": "#FFC000", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S37", "titre": "Ravitaillement Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 2, "couleur": "#009B77", "avecQui": "Bouloc Véronique, Cornille Solène, Dal Corso Domy, Dal Corso Pauline, Giambra Cathy, Gombert Sylvie, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "19:00", "numero": "S50", "titre": "Ravitaillement Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nravitaillement coureurs + animation", "duree": 3, "couleur": "#7030A0", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Pasquier Pascale, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B048": {
+      "nom": "Roca",
+      "prenom": "Christophe",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 8.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "09:00", "numero": "S04", "titre": "Mise en place éléctricité", "commentaire": "Lieu : Place salle des Fêtes\nTirer une rallonge du coffret de la salle au parc en aérien\nTirer une rallonge des vestiaires au milieu du terrain de foot\nPosition : voir avec Michel Berardo", "duree": 1, "couleur": "#FFC000", "avecQui": "Authier Laurent, Dupont Philippe, Roca Christophe"},
+          {"periode": "Matin", "hd": "09:00", "hf": "10:00", "numero": "S08", "titre": "Finir les sacs coureurs et distribution", "commentaire": "Lieu : Salle des Fêtes\nFinir les sacs si besoin et les vérifier ( voir la liste en V05 )\nPréparer le poste de remise des dossards ", "duree": 1, "couleur": "#88B04B", "avecQui": "Beaules Manon, Cornille Solène, Roca Christophe"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S24", "titre": "Sécurité Parcours P4 Equipe 1", "commentaire": "Croisement rue 19 mars 1962 / rue Guillaume Appolinaire\n11h30-12h00: Mise en place des barrières et ruubalises\nCirculation alternée sur cette zone à gérer avec le poste d'après P5", "duree": 3, "couleur": "#CC79A7", "avecQui": "Martineau Loïc, Roca Christophe"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S48", "titre": "Sécurité Parcours P5 Equipe 3", "commentaire": "Bas du cimetière / rue Guillaume Appolinaire et rue Claude Nougaro\nPour info circulation alternée sur cette zone\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#CC79A7", "avecQui": "Martineau Loïc, Roca Christophe"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D02", "titre": "Salle des fêtes", "commentaire": "Lieu : Salle des Fêtes\nNettoyer la vaisselle\nranger le matériel\nranger la nourriture et faire le bilan\nBilan des boissons\nmettre de côté tout ce qui doit être rendu aux fournisseurs", "duree": 3, "couleur": "#FF6F61", "avecQui": "Authier Laure, Authier Laurent, Gombert Eric, Gombert Sylvie, Lavigne Gérard, Lavigne Martine, Roca Christophe"}
+        ]}
+      ]
+    },
+    "B049": {
+      "nom": "Roca",
+      "prenom": "Vincent",
+      "total": 9.5,
+      "jours": [
+        {"jour": "Samedi", "total": 9.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S23", "titre": "Sécurité Parcours P3 Equipe 1", "commentaire": "Croisement rue Alain Saint Paul / rue 19 mars 1962\n11h30-12h00: Mise en place des barrières et rubalises\n     Mise en place des poubelles (voir plan)", "duree": 3, "couleur": "#D55E00", "avecQui": "Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "14:30", "hf": "15:00", "numero": "S58", "titre": "Installation du podium", "commentaire": "Lieu : Place salle des Fêtes\nInstallation du podium\nCacher les roues avec la nappe noire\nmettre  une table\nmettre en place les affiches des partenaires ", "duree": .5, "couleur": "#92A8D1", "avecQui": "Colomb Lucie, Morin Caroline, Odouard Dominique, Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S44", "titre": "Sécurité Parcours P1 Equipe 3", "commentaire": "Place de la mairie et de l'église\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise", "duree": 2.5, "couleur": "#009E73", "avecQui": "Poulain Roca Mélanie, Roca Vincent"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S63", "titre": "Démontage ravitaillement", "commentaire": "Lieu : Place salle des Fêtes\nRangement du ravitaillement\ndémontage du barnum et rangement", "duree": .5, "couleur": "#45B8AC", "avecQui": "Boudot Sylvie, Bouloc Véronique, Dal Corso Domy, Dal Corso Pauline, Long Véronique, Mayonove Damien, Morin Alain, Pasquier Pascale, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B050": {
+      "nom": "Russias",
+      "prenom": "Pierre",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "10:00", "numero": "S12", "titre": "Prépa Speakers / Sono", "commentaire": "Lieu : Place salle des Fêtes\nCoordination Speaker et Stc Sono\nFaire le point avec Christian sur le doc d'info course, partenaires et coureurs", "duree": .5, "couleur": "#B565A7", "avecQui": "Dal Corso Christian, Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Matin/Après-midi", "hd": "10:00", "hf": "19:00", "numero": "S15", "titre": "Animation Speaker Place ", "commentaire": "Lieu : Place salle des Fêtes\nAnimation de la course\nPrésentation des coureurs\nPrésentation des partenaires\nPrésentation des bénévoles\nblablabla …\nJe vous fais confiance", "duree": 9, "couleur": "#45B8AC", "avecQui": "Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "20:00", "numero": "S65", "titre": "Podium Animation", "commentaire": "Lieu : Place salle des Fêtes\nAnimation Speaker vous choisissez qui fait quoi", "duree": 1, "couleur": "#5B5EA6", "avecQui": "Martin François, Reina Christian, Russias Pierre"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B051": {
+      "nom": "Stc",
+      "prenom": "Tech1",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi", "hd": "09:00", "hf": "20:00", "numero": "S09", "titre": "Sono Fixe et mobile", "commentaire": "Lieu : Place salle des Fêtes\nInstallation, Suivi et démontage", "duree": 11, "couleur": "#F7CAC9", "avecQui": "Stc Tech1, Stc Tech2"}
+        ]}
+      ]
+    },
+    "B052": {
+      "nom": "Stc",
+      "prenom": "Tech2",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi", "hd": "09:00", "hf": "20:00", "numero": "S09", "titre": "Sono Fixe et mobile", "commentaire": "Lieu : Place salle des Fêtes\nInstallation, Suivi et démontage", "duree": 11, "couleur": "#F7CAC9", "avecQui": "Stc Tech1, Stc Tech2"}
+        ]}
+      ]
+    },
+    "B053": {
+      "nom": "Valery",
+      "prenom": "Lolo",
+      "total": 5,
+      "jours": [
+        {"jour": "Samedi", "total": 5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "15:00", "numero": "S39", "titre": "Animation Mobile 1", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 1", "duree": 1, "couleur": "#45B8AC", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "15:30", "hf": "16:30", "numero": "S43", "titre": "Animation Mobile 2", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 2", "duree": 1, "couleur": "#56B4E9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S57", "titre": "Animation Mobile 3", "commentaire": "Lieu : Place salle des Fêtes - Parcours\nAnimation Mobile 3", "duree": 1, "couleur": "#F7CAC9", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:00", "numero": "S59", "titre": "Récupérer les pizzas ", "commentaire": "lieu : Chez Dany\nRécupérer 6 plaques de pizzas pour l'apéro chez Dany", "duree": .5, "couleur": "#955251", "avecQui": "Bouloc Laurent, Mayonove Damien, Morin Alain, Valery Lolo"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B054": {
+      "nom": "Vigier",
+      "prenom": "Serge",
+      "total": 11,
+      "jours": [
+        {"jour": "Samedi", "total": 11, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S11", "titre": "Mise en place de la buvette", "commentaire": "Lieu : Place salle des Fêtes\nMonter la structure ( Serge Vigier gère le montage et la mise en place )\nMettre en route la tireuse\nPréparer les bacs et le frigo\n….", "duree": 1.5, "couleur": "#955251", "avecQui": "Couderc Alain, Duverneuil Mathieu, Odouard Dominique, Vigier Serge"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S18", "titre": "Gestion buvettte Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#E69F00", "avecQui": "Couderc Alain, Guirard Daniel, Vigier Serge, Vigier Nathalie"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S32", "titre": "Sécurité Parcours P2 Equipe 2", "commentaire": "Rond point avenue Victor Molinier / rue Alain Saint Paul ", "duree": 2, "couleur": "#88B04B", "avecQui": "Authier Laure, Vigier Serge"},
+          {"periode": "Après-midi", "hd": "17:00", "hf": "20:00", "numero": "S55", "titre": "Gestion buvettte Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#6B5B95", "avecQui": "Couderc Alain, Lagarrigue Marie, Vigier Serge, Vuillemin Marc"},
+          {"periode": "Après-midi/Soir", "hd": "20:00", "hf": "20:30", "numero": "S67", "titre": "Démontage buvette", "commentaire": "Lieu : Place salle des Fêtes\nSerge Vigier gère ce poste\nRanger les boissons\nRanger les tireuses\ndémonter la structure\ntout mettre dans la salle du foot", "duree": .5, "couleur": "#56B4E9", "avecQui": "Authier Laurent, Beaules Léon, Cornille Solène, Vigier Serge"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B055": {
+      "nom": "Vigier",
+      "prenom": "Nathalie",
+      "total": 5.5,
+      "jours": [
+        {"jour": "Samedi", "total": 5.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S18", "titre": "Gestion buvettte Equipe 1", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#E69F00", "avecQui": "Couderc Alain, Guirard Daniel, Vigier Serge, Vigier Nathalie"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B056": {
+      "nom": "Vivier",
+      "prenom": "Ludovic",
+      "total": 11.5,
+      "jours": [
+        {"jour": "Samedi", "total": 11.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S06", "titre": "Barrières et tables Place", "commentaire": "Lieu : Place salle des Fêtes\nMise en place des tables pour les coureurs (30 tables 60 bancs)\non utilise les grandes tables en pin avec les pieds pliants et les bancs associés\nMise en place de l'arche ( Christian Reina gère le montage )\nMise en place des barrières pour délimiter le parcours ( Christian Dal Corso gère )", "duree": 2, "couleur": "#FF6F61", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Bouloc Véronique, Colomb Lucie, Dal Corso Domy, Guirard Daniel, Legriel Sébastien, Poulain Roca Mélanie, Roca Vincent, Roca Cathy"},
+          {"periode": "Matin/Après-midi", "hd": "11:00", "hf": "14:00", "numero": "S22", "titre": "Sécurité Parcours P2 Equipe 1", "commentaire": "Rond point avenue Victor Molinier / rue Alain Saint Paul\n11h30-12h00: Mise en place des barrières et rubalises", "duree": 3, "couleur": "#0072B2", "avecQui": "Bahurlet Gisèle, Vivier Ludovic"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:30", "numero": "S46", "titre": "Sécurité Parcours P3 Equipe 3", "commentaire": "Croisement rue Alain Saint Paul / rue 19 mars 1962\nAprès le dernier coureur :\nRanger les barrières sur le trottoir\nSortir la rubalise\nRemonter les conteneurs à la salle", "duree": 2.5, "couleur": "#0072B2", "avecQui": "Bahurlet Gisèle, Vivier Ludovic"},
+          {"periode": "Après-midi", "hd": "19:00", "hf": "19:30", "numero": "S60", "titre": "Panneaux déviations fin", "commentaire": "Lieu : Place salle des Fêtes - Sainte Foy\nRéouverture de l'av Joseph Huc et Vitor Molinier à 18h30\nRécupération des panneaux de déviations", "duree": .5, "couleur": "#B565A7", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Léon, Martineau Loïc"},
+          {"periode": "Après-midi", "hd": "19:30", "hf": "20:00", "numero": "S66", "titre": "Rangement de la place ", "commentaire": "Lieu : Place salle des Fêtes\nrangement des tables\nrangement des barrières\ndémontage des arches", "duree": .5, "couleur": "#E69F00", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "22:00", "hf": "23:00", "numero": "S75", "titre": "Service Gâteau", "commentaire": "Lieu : Salle des Fêtes\nServir la tarte aux pommes dans les assiettes et les donner aux personnes\nsur la fin les mettre dans les assiettes et les poser sur une table", "duree": 1, "couleur": "#00B0F0", "avecQui": "Authier Laurent, Bahurlet Gisèle, Vivier Ludovic, Beaules Manon, Bouloc Laurent, Dupont Geneviève"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B057": {
+      "nom": "Vuillemin",
+      "prenom": "Marc",
+      "total": 19.5,
+      "jours": [
+        {"jour": "Vendredi", "total": 6.5, "taches": [
+          {"periode": "Matin", "hd": "08:00", "hf": "12:30", "numero": "V03", "titre": "Préparation Parcours & Parking", "commentaire": "Lieu : Salle des Fêtes - Sainte Foy\nRécupérer les piquets chez Gilbert\nDélimiter tout le tour du parking\nDélimiter le parcours au parc, tennis et remontée, place de la mairie\nVérifier les barrières", "duree": 4.5, "couleur": "#009E73", "avecQui": "Dal Corso Christian, Dupont Philippe, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "V06", "titre": "Mise en place des panneaux", "commentaire": "Lieu : Salle des Fêtes - Sainte Foy\nPlacer pour le samedi les panneaux de déviation et routes barrées\nFinaliser balisage parcours", "duree": 2, "couleur": "#D55E00", "avecQui": "Dupont Philippe, Vuillemin Marc"}
+        ]},
+        {"jour": "Samedi", "total": 10, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "08:00", "hf": "10:00", "numero": "S05", "titre": "Structure ravitaillement ", "commentaire": "Lieu : Place salle des Fêtes\nInstallation Barnum 10x5 ( Alain Morin gère le montage )\nMise en place des poids\nMise en place des tables\nMise en place des supports pour les écocups ( Alain Morin  )", "duree": 2, "couleur": "#A9D08E", "avecQui": "Authier Maxime, Bouloc Laurent, Gombert Eric, Martineau Loïc, Morin Alain, Vuillemin Marc"},
+          {"periode": "Matin", "hd": "10:00", "hf": "11:00", "numero": "S10", "titre": "Récuperer la remorque Chez Alain", "commentaire": "Récuperer la remorque Chez Alain", "duree": 1, "couleur": "#92A8D1", "avecQui": "Lavigne Gérard, Vuillemin Marc"},
+          {"periode": "Matin", "hd": "11:30", "hf": "12:00", "numero": "S27", "titre": "Panneaux déviations début", "commentaire": "Fermeture de la circulation Rond point SPAR et Statue de la vierge à 11h30\nFermeture de l'av Joseph Huc et Vitor Molinier à 11h30\nMise en place des panneaux de déviation", "duree": .5, "couleur": "#00B0F0", "avecQui": "Bouloc Laurent, Duverneuil Mathieu, Lavigne Gérard, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "14:00", "hf": "16:00", "numero": "S35", "titre": "Sécurité Parcours P5 Equipe 2", "commentaire": "Bas du cimetière / rue Guillaume Appolinaire et rue Claude Nougaro\nPour info circulation alternée sur cette zone", "duree": 2, "couleur": "#955251", "avecQui": "Lavigne Gérard, Vuillemin Marc"},
+          {"periode": "Après-midi", "hd": "17:00", "hf": "20:00", "numero": "S55", "titre": "Gestion buvettte Equipe 3", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#6B5B95", "avecQui": "Couderc Alain, Lagarrigue Marie, Vigier Serge, Vuillemin Marc"},
+          {"periode": "Après-midi/Soir", "hd": "20:00", "hf": "20:30", "numero": "S76", "titre": "Ramener la remorque chez Alain", "commentaire": "Ramener la remorque chez Alain", "duree": .5, "couleur": "#FFC000", "avecQui": "Vuillemin Marc"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]},
+        {"jour": "Dimanche", "total": 3, "taches": [
+          {"periode": "Matin", "hd": "09:00", "hf": "12:00", "numero": "D01", "titre": "Nettoyage parcours", "commentaire": "Lieu : Place de la salle des Fêtes - Parcours\nRetirer la rubalise\nvérifier rangement de barrières\nramasser les déchets\nramasser les piquets et les rapporter à Gilbert", "duree": 3, "couleur": "#A9D08E", "avecQui": "Bouloc Laurent, Couderc Alain, Dal Corso Christian, Vuillemin Marc"}
+        ]}
+      ]
+    },
+    "B058": {
+      "nom": "Vuillemin",
+      "prenom": "Nicole",
+      "total": 10.5,
+      "jours": [
+        {"jour": "Vendredi", "total": 3, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "V05", "titre": "Préparation sacs coureurs et bénévoles", "commentaire": "Lieu : Salle des Fêtes\nTickets repas ( Bénévoles, Coureurs, Groupe, Invités et Vente ) nombre à confirmer\nCoureurs : N° dossard sur le sac, miel, 4 épingles, ticket repas (si inscrit), achat miel sup et carte de visite et flyers\nLes ranger par course et N° \nBénévoles : Petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et un buff. Le sandwich sera fait samedi\nMettre les étiquettes sur les écocups de la course\nPréparation des poches podiums", "duree": 3, "couleur": "#0072B2", "avecQui": "Claverie Emmanuelle, Dupont Geneviève, Lavigne Gérard, Lavigne Martine, Vuillemin Nicole"}
+        ]},
+        {"jour": "Samedi", "total": 7.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "10:00", "hf": "12:00", "numero": "S14", "titre": "Remise des dossards 6h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#DD4124", "avecQui": "Authier Laurent, Beaules Manon, Vuillemin Nicole"},
+          {"periode": "Après-midi", "hd": "13:00", "hf": "15:00", "numero": "S30", "titre": "Remise des dossards 3h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#FF6F61", "avecQui": "Lagarrigue Marie, Legriel Caula Sophie, Vuillemin Nicole"},
+          {"periode": "Après-midi", "hd": "15:00", "hf": "17:00", "numero": "S41", "titre": "Remise des dossards 1h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#5B5EA6", "avecQui": "Lagarrigue Marie, Vuillemin Nicole, Calmettes Véronique"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"}
+        ]}
+      ]
+    },
+    "B059": {
+      "nom": "Idoux",
+      "prenom": "Cécile",
+      "total": 6.5,
+      "jours": [
+        {"jour": "Samedi", "total": 6.5, "taches": [
+          {"periode": "Après-midi", "hd": "14:00", "hf": "17:00", "numero": "S38", "titre": "Gestion buvettte Equipe 2", "commentaire": "Lieu : Place salle des Fêtes\nTenir la buvette ( Alain Couderc : Gérer le sumup pour les paiements par carte )\nTarif des boissons 2€ et 10€ le pichet pas de consigne", "duree": 3, "couleur": "#DD4124", "avecQui": "Couderc Alain, Dupont Geneviève, Guirard Daniel, Idoux Cécile"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"},
+          {"periode": "Après-midi/Soir", "hd": "18:30", "hf": "20:30", "numero": "S62", "titre": "Service Apéro", "commentaire": "Lieu : Place salle des Fêtes\nPréparation\nMise en place des tables ( recup celles des coureurs )\nMise en place apéro\nRangement", "duree": 2, "couleur": "#DD4124", "avecQui": "Legriel Sébastien, Idoux Cécile, Gautier Jean-Marc"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B060": {
+      "nom": "Gautier",
+      "prenom": "Jean-Marc",
+      "total": 7.5,
+      "jours": [
+        {"jour": "Samedi", "total": 7.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S13", "titre": "Casse-croûte bénévoles", "commentaire": "Lieu : Salle des Fêtes\nFaire les sandwichs\nfinir les sacs (sandwich, petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et cadeaux buff et écocup)\nDistribution des premiers à partir de 10h30 ( bénévole du parcours )", "duree": 1.5, "couleur": "#009B77", "avecQui": "Authier Laure, Gombert Sylvie, Lagarrigue Sylvie, Legriel Caula Sophie, Morin Caroline, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi/Soir", "hd": "18:30", "hf": "20:30", "numero": "S62", "titre": "Service Apéro", "commentaire": "Lieu : Place salle des Fêtes\nPréparation\nMise en place des tables ( recup celles des coureurs )\nMise en place apéro\nRangement", "duree": 2, "couleur": "#DD4124", "avecQui": "Legriel Sébastien, Idoux Cécile, Gautier Jean-Marc"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B061": {
+      "nom": "Gautier",
+      "prenom": "Nathalie",
+      "total": 6.5,
+      "jours": [
+        {"jour": "Samedi", "total": 6.5, "taches": [
+          {"periode": "Matin", "hd": "07:30", "hf": "08:00", "numero": "S02", "titre": "Briefing bénévoles", "commentaire": "Lieu : Salle des Fêtes\nBriefing Bénévoles présentation des responsables\nMichel Berardo référent marche nordique, rando et Kid Trail\nAlain Couderc référent repas, buvette et apéro\nLéon Beaules : Parcours \nCathy Roca : Ravitaillement\nChristian Dal Corso référent course et divers problèmes", "duree": .5, "couleur": "#7030A0", "avecQui": "tous les bénévoles disponibles"},
+          {"periode": "Matin", "hd": "09:30", "hf": "11:00", "numero": "S13", "titre": "Casse-croûte bénévoles", "commentaire": "Lieu : Salle des Fêtes\nFaire les sandwichs\nfinir les sacs (sandwich, petit paquet de chips, fromage, compote, bouteille d'eau 1/2L et cadeaux buff et écocup)\nDistribution des premiers à partir de 10h30 ( bénévole du parcours )", "duree": 1.5, "couleur": "#009B77", "avecQui": "Authier Laure, Gombert Sylvie, Lagarrigue Sylvie, Legriel Caula Sophie, Morin Caroline, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "16:00", "hf": "18:00", "numero": "S52", "titre": "Mise en place des tables + apéro", "commentaire": "Lieu : Place salle des Fêtes\nInstallation des tables dans la salle des fêtes\nNappes, couverts, verres et serviettes ( pas les assiettes )\nMise en place table pour l'eau et le vin\nMise en place de la table pour le groupe de banda\nprévoir un espace pour danser et pour la banda ( l'année dernière c'était devant la sono )\nPrépation de l'apéro Kir et amuse bouche", "duree": 2, "couleur": "#FFC000", "avecQui": "Authier Laure, Authier Laurent, Beaules Manon, Lagarrigue Sylvie, Legriel Sébastien, Pallaruelo Françoise, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Après-midi", "hd": "18:30", "hf": "19:30", "numero": "S61", "titre": "Repas Banda", "commentaire": "Lieu : Salle des Fêtes\nService du groupe de bandas\nprépation de la table vin, eau, pain et café\nNettoyage de la table des bandas", "duree": 1, "couleur": "#009B77", "avecQui": "Authier Laure, Lagarrigue Sylvie, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "20:30", "hf": "21:30", "numero": "S69", "titre": "Service", "commentaire": "Lieu : Salle des Fêtes\nService du rougail saucisse ( Michel Calmettes gère le service )", "duree": 1, "couleur": "#F0E442", "avecQui": "Bahurlet Gisèle, Vivier Ludovic, Bouloc Laurent, Bouloc Véronique, Calmettes Michel, Couderc Alain, Dal Corso Domy, Dupont Philippe, Dupont Geneviève, Gombert Eric, Gombert Sylvie, Lagarrigue Sylvie, Lavigne Gérard, Lavigne Martine, Gautier Jean-Marc, Gautier Nathalie"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    },
+    "B062": {
+      "nom": "Calmettes",
+      "prenom": "Véronique",
+      "total": 5,
+      "jours": [
+        {"jour": "Samedi", "total": 5, "taches": [
+          {"periode": "Après-midi", "hd": "15:00", "hf": "17:00", "numero": "S41", "titre": "Remise des dossards 1h", "commentaire": "Lieu : Salle des Fêtes\nOn demande la pièce d'identité pour donner le dossard\nOn coche sur la liste\non vérifie le contenu du sac", "duree": 2, "couleur": "#5B5EA6", "avecQui": "Lagarrigue Marie, Vuillemin Nicole, Calmettes Véronique"},
+          {"periode": "Après-midi", "hd": "17:30", "hf": "18:30", "numero": "S56", "titre": "Récupération des puces", "commentaire": "Lieu : Place salle des Fêtes\nPréparation de l'entonnoir pour la récupération des puces pour mise en service à 18h00 \nRécupérer les puces de chronométrage ( faire attention que les coureurs ne passent pas par les côtés )", "duree": 1, "couleur": "#88B04B", "avecQui": "Delmas Elisabeth, Dupont Geneviève, Gombert Sylvie, Lavigne Gérard, Vigier Nathalie, Vuillemin Nicole, Idoux Cécile, Calmettes Véronique"},
+          {"periode": "Après-midi/Soir", "hd": "19:00", "hf": "20:30", "numero": "S20", "titre": "Ticket repas", "commentaire": "Distribuer les tickets repas pour les personnes qui ont prix seulement le repas.\nPrévoir une table dans le hall de la salle des fêtes", "duree": 1.5, "couleur": "#009E73", "avecQui": "Calmettes Véronique"},
+          {"periode": "Soir", "hd": "23:30", "hf": "00:00", "numero": "S72", "titre": "Rangement salle", "commentaire": "Lieu : Salle des Fêtes\nTables, nettoyage, ….\nA partir de 23h en fonction de l'ambiance et jusqu’à que ce soit terminé", "duree": .5, "couleur": "#CC79A7", "avecQui": "tous les bénévoles disponibles"}
+        ]}
+      ]
+    }
+  }
+};
+
+function formatDuree(h) {
+  const totalMin = Math.round(h * 60);
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  if (hh === 0) return mm + "min";
+  return mm === 0 ? (hh + "h") : (hh + "h" + String(mm).padStart(2, "0"));
+}
+function texteContrasteSur(hex) {
+  hex = (hex || "#999999").replace("#", "");
+  const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+  return (0.299*r + 0.587*g + 0.114*b) < 140 ? "#ffffff" : "#1a1a1a";
+}
+function echapper(s) {
+  const d = document.createElement("div");
+  d.textContent = s == null ? "" : String(s);
+  return d.innerHTML;
+}
+function getParam(nom) {
+  const params = new URLSearchParams(window.location.search);
+  let v = params.get(nom);
+  if (!v && window.location.hash) v = window.location.hash.replace(/^#\/?/, "");
+  return v ? v.trim().toUpperCase() : "";
+}
+
+function rendreBenevole(id, b) {
+  let html = "";
+  html += '<header class="topbar">';
+  html += '  <p class="app-title">Mon planning bénévole</p>';
+  html += '  <p class="nom">' + echapper(b.prenom) + " " + echapper(b.nom).toUpperCase() + '</p>';
+  html += '  <span class="total-general">Total : ' + formatDuree(b.total) + '</span>';
+  html += '</header>';
+  html += '<main>';
+  if (!b.jours.length) {
+    html += '<div class="vide">Aucune tâche ne vous est actuellement assignée.<br>Ce planning peut encore évoluer : revenez consulter cette page régulièrement.</div>';
+  } else {
+    for (const j of b.jours) {
+      html += '<section class="jour-bloc">';
+      html += '  <div class="jour-entete"><span class="jour-nom">' + echapper(j.jour) + '</span><span class="jour-total">' + formatDuree(j.total) + '</span></div>';
+      for (const t of j.taches) {
+        const coul = t.couleur || "#999999";
+        html += '<div class="tache">';
+        html += '  <div class="heure">' + t.hd + '<br>' + t.hf + '</div>';
+        html += '  <div class="contenu">';
+        html += '    <div class="ligne-titre"><span class="badge-numero" style="background:' + coul + ';color:' + texteContrasteSur(coul) + '">' + echapper(t.numero) + '</span><span class="titre-tache">' + echapper(t.titre) + '</span></div>';
+        if (t.commentaire) html += '<div class="commentaire">' + echapper(t.commentaire) + '</div>';
+        if (t.avecQui) html += '<div class="avec-qui">Avec : ' + echapper(t.avecQui) + '</div>';
+        html += '    <div class="duree">' + formatDuree(t.duree) + '</div>';
+        html += '  </div>';
+        html += '</div>';
+      }
+      html += '</section>';
+    }
+    html += '<div class="total-final">Total de vos heures sur l\'événement : <span>' + formatDuree(b.total) + '</span></div>';
+  }
+  html += '</main>';
+  html += '<footer>Planning généré le ' + echapper(DATA.genere) + '. En cas de doute, contactez l\'organisation.</footer>';
+  return html;
+}
+
+function rendreRecherche(filtre) {
+  filtre = (filtre || "").toLowerCase();
+  let html = '<header class="topbar"><p class="app-title">Mon planning bénévole</p><p class="nom" style="font-size:19px">Retrouvez votre planning</p></header>';
+  html += '<div class="recherche">';
+  html += '<p>Le lien scanné ne correspond à aucun bénévole connu, ou aucun identifiant n\'a été fourni. Recherchez votre nom ci-dessous :</p>';
+  html += '<input type="search" id="recherche-input" placeholder="Tapez votre nom..." autocomplete="off" value="' + echapper(filtre) + '">';
+  html += '<div class="liste-resultats" id="liste-resultats"></div>';
+  html += '</div>';
+  return html;
+}
+
+function listeFiltreeHTML(filtre) {
+  const entries = Object.entries(DATA.benevoles)
+    .filter(([id, b]) => !filtre || (b.nom + " " + b.prenom).toLowerCase().includes(filtre))
+    .sort((a, b) => (a[1].nom + a[1].prenom).localeCompare(b[1].nom + b[1].prenom));
+  if (!filtre) return "";
+  if (!entries.length) return '<div class="vide">Aucun résultat.</div>';
+  return entries.slice(0, 12).map(([id, b]) =>
+    '<a class="resultat-item" href="?id=' + encodeURIComponent(id) + '">' + echapper(b.prenom) + ' ' + echapper(b.nom) +
+    '<small>' + formatDuree(b.total) + ' sur l\'événement</small></a>'
+  ).join("");
+}
+
+function demarrer() {
+  const id = getParam("id");
+  const page = document.getElementById("page");
+  if (id && DATA.benevoles[id]) {
+    page.innerHTML = rendreBenevole(id, DATA.benevoles[id]);
+  } else {
+    page.innerHTML = rendreRecherche("");
+    const input = document.getElementById("recherche-input");
+    const liste = document.getElementById("liste-resultats");
+    input.addEventListener("input", () => { liste.innerHTML = listeFiltreeHTML(input.value); });
+    input.focus();
+  }
+}
+demarrer();
+</script>
+</body>
+</html>
+
